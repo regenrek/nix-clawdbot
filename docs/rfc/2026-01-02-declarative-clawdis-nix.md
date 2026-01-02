@@ -1,7 +1,7 @@
 # RFC: Declarative Clawdis as a Nix Package (nix-clawdis)
 
 - Date: 2026-01-02
-- Status: Draft
+- Status: Implementing
 - Audience: Nix users, agents (Codex/Claude), package maintainers, operators
 
 ## 1) Narrative: what we are building and why
@@ -39,7 +39,7 @@ Non-goals:
 
 ## 3) System overview
 
-`nix-clawdis` is a public repo that provides (macOS-only in v1):
+`nix-clawdis` is a public repo that provides (macOS-only in v1, no CI in v1):
 - A Nix package derivation for Clawdis.
 - A Home Manager module for user-level config and service wiring.
 - A nix-darwin module for macOS users (optional, thin wrapper over HM).
@@ -292,12 +292,24 @@ Findings (by persona):
 - End user: Needed a technically light path with clear next command; added 9.1 + 9.2 to require that output.
 
 Open gaps (must resolve before “Reviewed”):
-- Exact Nix option names and module layout still proposed, not finalized.
 - WhatsApp/web QR flow still described but not specified (command + output).
-- CI scope (macOS vs Linux) must be confirmed.
+- `clawdis-setup` wizard is stub-only.
 
 Second pass review (delta):
 - Tightened language to “technically light” and made Telegram-first explicit.
 - Made macOS-only + no-CI explicit in goals/non-goals and testing.
 - Moved examples into inline RFC blocks to keep the document self-contained.
 - Added Zero-to-Clawdis + Agent Copypasta requirements as first-class docs.
+
+## 18) Implementation status (current)
+
+Implemented in `nix-clawdis` repo:
+- Flake outputs: package + apps + devShell + HM module + darwin wrapper
+- Clawdis gateway package pinned to `d4ee40db53a1d00b448a1153f2be58007213110f`
+- Telegram-first HM module (launchd on macOS)
+- README + Zero-to-Clawdis + Agent Copypasta + Quickstart/Config/Troubleshooting docs
+
+Remaining:
+- Replace `clawdis-setup` stub with real guided flow
+- Validate pnpmDeps hash against current pin
+- Add WhatsApp quickstart once Telegram path is verified
