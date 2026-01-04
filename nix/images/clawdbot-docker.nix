@@ -10,19 +10,15 @@ let
     '';
   };
   toolsBase = pkgs.clawdbot-tools-base;
-in
-pkgs.dockerTools.buildLayeredImage {
-  name = "clawdbot";
-  tag = "latest";
-  contents = [
+  baseContents = [
     pkgs.bash
     pkgs.coreutils
     pkgs.cacert
     pkgs.python3
     entrypoint
-    pkgs.clawdbot-gateway
     toolsBase
   ];
+  gatewayContents = [ pkgs.clawdbot-gateway ];
   config = {
     Entrypoint = [ "/bin/clawdbot-entrypoint" ];
     WorkingDir = "/data";
@@ -34,4 +30,18 @@ pkgs.dockerTools.buildLayeredImage {
       "CLAWDBOT_TELEGRAM_REQUIRE_MENTION=true"
     ];
   };
+  image = pkgs.dockerTools.buildLayeredImage {
+    name = "clawdbot";
+    tag = "latest";
+    contents = baseContents ++ gatewayContents;
+    inherit config;
+  };
+  stream = pkgs.dockerTools.streamLayeredImage {
+    name = "clawdbot";
+    tag = "latest";
+    contents = baseContents ++ gatewayContents;
+    inherit config;
+  };
+in {
+  inherit image stream;
 }

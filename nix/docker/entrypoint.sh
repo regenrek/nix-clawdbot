@@ -60,5 +60,7 @@ fi
 
 export CLAWDBOT_CONFIG_PATH="$config_path"
 export CLAWDBOT_STATE_DIR="$data_dir"
+export CLAWDIS_CONFIG_PATH="$config_path"
+export CLAWDIS_STATE_DIR="$data_dir"
 
 exec /bin/clawdbot gateway --port "$gateway_port"

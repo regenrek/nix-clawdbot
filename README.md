@@ -87,8 +87,10 @@ This is a Telegram-only, headless gateway. The macOS app is separate.
 Build the image with Determinate Nix (uses a Linux builder under the hood):
 
 ```bash
-nix build .#clawdbot-docker --system aarch64-linux
-docker load < result
+nix run .#clawdbot-docker-stream --system aarch64-linux | docker load
+# or (slower, writes a tarball):
+# nix build .#clawdbot-docker --system aarch64-linux
+# docker load < result
 ```
 
 Run it (state lives in a mounted volume at /data):
@@ -434,7 +436,8 @@ Deliverables: flake output, env overrides, AGENTS.md, skill update.
 | `clawdbot` (default) | Gateway + app + full toolchain |
 | `clawdbot-gateway` | Gateway CLI only |
 | `clawdbot-app` | macOS app only |
-| `clawdbot-docker` | OCI image (gateway + tools) |
+| `clawdbot-docker` | OCI image tarball (gateway + tools) |
+| `clawdbot-docker-stream` | OCI image stream (fast load) |
 
 ## Plugin collisions (override policy)
 

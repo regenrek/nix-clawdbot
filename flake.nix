@@ -24,7 +24,8 @@
           clawdbot-gateway = pkgs.clawdbot-gateway;
           clawdbot-app = pkgs.clawdbot-app;
           clawdbot = pkgs.clawdbot;
-          clawdbot-docker = import ./nix/images/clawdbot-docker.nix { inherit pkgs; };
+          clawdbot-docker = (import ./nix/images/clawdbot-docker.nix { inherit pkgs; }).image;
+          clawdbot-docker-stream = (import ./nix/images/clawdbot-docker.nix { inherit pkgs; }).stream;
           clawdbot-tools-base = pkgs.clawdbot-tools-base;
           clawdbot-tools-extended = pkgs.clawdbot-tools-extended;
           default = pkgs.clawdbot;
