@@ -9,6 +9,7 @@
 ## Table of Contents
 
 - [What You Get](#what-you-get)
+- [Requirements](#requirements)
 - [Why Nix?](#why-nix)
 - [Quick Start](#quick-start)
 - [How It Works](#how-it-works)
@@ -40,6 +41,20 @@ You talk to Telegram, your Mac does things.
 **Plugins are self-contained.** Each plugin declares its CLI tools in Nix. You enable it, the build and wiring happens automatically.
 
 **Bulletproof.** Nix locks every dependency. No version drift, no surprises. `home-manager switch` to update, `home-manager generations` to rollback instantly.
+
+---
+
+## Requirements
+
+1. **macOS** (Apple Silicon or Intel)
+2. **[Determinate Nix](https://docs.determinate.systems/determinate-nix/)** installed on your machine
+
+That's it. The Quick Start will guide you through everything else.
+
+> **Don't have Nix yet?** The [Quick Start](#quick-start) agent copypasta will install it for you, or you can run:
+> ```bash
+> curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+> ```
 
 ---
 
@@ -201,6 +216,8 @@ All state lives in `~/.clawdbot/`. Logs at `/tmp/clawdbot/clawdbot-gateway.log`.
 ---
 
 ## Plugins
+
+> **Note:** Complete the [Quick Start](#quick-start) first to get Clawdbot running. Then come back here to add plugins.
 
 Plugins extend what Clawdbot can do. Each plugin bundles tools and teaches the AI how to use them.
 
