@@ -36,17 +36,22 @@ token_file="$secrets_dir/telegram-bot-token"
 umask 077
 printf "%s" "$bot_token" > "$token_file"
 
-allow_from_json="$(
-  python3 - <<'PY'
-import json
-import os
-
-raw = os.environ["CLAWDBOT_TELEGRAM_ALLOW_FROM"]
-parts = [p.strip() for p in raw.replace(" ", ",").split(",") if p.strip()]
-ids = [int(p) for p in parts]
-print(json.dumps(ids))
-PY
-)"
+raw_allow_from="${allow_from_raw// /,}"
+allow_from_json="["
+first=1
+IFS=',' read -r -a allow_parts <<< "$raw_allow_from"
+for part in "${allow_parts[@]}"; do
+  part="$(printf "%s" "$part" | tr -d '[:space:]')"
+  if [ -z "$part" ]; then
+    continue
+  fi
+  if [ "$first" -eq 0 ]; then
+    allow_from_json+=", "
+  fi
+  allow_from_json+="$part"
+  first=0
+done
+allow_from_json+="]"
 
 cat > "$config_path" <<EOF2
 {

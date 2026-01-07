@@ -5,6 +5,7 @@
 , nodejs_22
 , pnpm_10
 , pkg-config
+, jq
 , python3
 , node-gyp
 , makeWrapper
@@ -13,7 +14,7 @@
 , zstd
 , sourceInfo
 , gatewaySrc ? null
-, pnpmDepsHash ? null
+, pnpmDepsHash ? "sha256-Y6+baewnub431IPE/gM7VHyevzp/AEjUJqLtNK25ztc="
 }:
 
 assert gatewaySrc == null || pnpmDepsHash != null;
@@ -41,7 +42,7 @@ in
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "clawdbot-gateway";
-  version = "2.0.0-beta4";
+  version = "2026.1.5-3";
 
   src = if gatewaySrc != null then gatewaySrc else fetchFromGitHub sourceInfo;
 
@@ -49,7 +50,7 @@ stdenv.mkDerivation (finalAttrs: {
     inherit (finalAttrs) pname version src;
     hash = if pnpmDepsHash != null
       then pnpmDepsHash
-      else "sha256-TITqhJhk5cHqCDmeX+KJ1hqt9dEbvJu6vi8xhteYfC4=";
+      else lib.fakeHash;
     fetcherVersion = 2;
     npm_config_arch = pnpmArch;
     npm_config_platform = pnpmPlatform;
@@ -60,6 +61,7 @@ stdenv.mkDerivation (finalAttrs: {
     nodejs_22
     pnpm_10
     pkg-config
+    jq
     python3
     node-gyp
     makeWrapper
@@ -80,16 +82,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   postPatch = ''
     if [ -f package.json ]; then
-      python3 - <<'PY'
-import json
-from pathlib import Path
-
-path = Path("package.json")
-data = json.loads(path.read_text())
-if "packageManager" in data:
-    data.pop("packageManager")
-    path.write_text(json.dumps(data, indent=2))
-PY
+      "${../scripts/remove-package-manager-field.sh}" package.json
     fi
   '';
 
@@ -108,20 +101,7 @@ PY
 
     # pnpm --ignore-scripts marks tarball deps as "not built" and offline install
     # later refuses to use them; if a dep doesn't require build, promote it.
-    while IFS= read -r -d "" file; do
-      if python3 - "$file" <<'PY'
-import json
-import sys
-
-path = sys.argv[1]
-with open(path, "r", encoding="utf-8") as fh:
-    data = json.load(fh)
-sys.exit(0 if not data.get("requiresBuild", False) else 1)
-PY
-      then
-        cp "$file" "''${file%integrity-not-built.json}integrity.json"
-      fi
-    done < <(find "$STORE_PATH" -name "integrity-not-built.json" -print0)
+    "${../scripts/promote-pnpm-integrity.sh}" "$STORE_PATH"
 
     pnpm config set store-dir "$STORE_PATH"
     pnpm config set package-import-method clone-or-copy
