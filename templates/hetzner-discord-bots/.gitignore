@@ -1,0 +1,15 @@
+# sops age keys (never commit)
+secrets/hosts/*.agekey
+secrets/hosts/*.key
+
+# nixos-anywhere extra-files (contains private key)
+secrets/extra-files/
+
+# local env vars
+.env
+
+# terraform
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*.tfplan
