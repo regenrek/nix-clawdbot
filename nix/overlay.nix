@@ -1,6 +1,6 @@
-self: super:
+final: prev:
 let
-  packages = import ./packages { pkgs = super; };
+  packages = import ./packages { pkgs = prev; };
 in
 packages // {
   clawdbotPackages = packages;
