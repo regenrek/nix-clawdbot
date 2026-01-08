@@ -533,6 +533,13 @@ Uses `instances.default` to unlock per-group mention rules. If `instances` is se
 
 ## Advanced
 
+### Hetzner Discord-only NixOS template
+
+Production-ready, VPN-only deployment for **4 Discord bots** on a single Hetzner VM.
+Includes Terraform, nixos-anywhere + disko, WireGuard, sops-nix, and hardened systemd services.
+
+Start here: `templates/hetzner-discord-bots/README.md`.
+
 ### Dual-instance setup (prod + dev)
 
 Use a shared base config and override only what's different. After changing local plugin or gateway code, re-run `home-manager switch` to rebuild.
