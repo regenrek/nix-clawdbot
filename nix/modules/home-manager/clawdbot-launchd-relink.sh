@@ -6,7 +6,13 @@ link_agent() {
   local label="$2"
 
   local candidate
-  candidate="$(/bin/ls -t /nix/store/*${label}.plist 2>/dev/null | /usr/bin/head -n 1 || true)"
+  local hm_gen
+  hm_gen="$(realpath "$HOME/.local/state/nix/profiles/home-manager" 2>/dev/null || true)"
+  if [ -n "$hm_gen" ] && [ -e "$hm_gen/LaunchAgents/${label}.plist" ]; then
+    candidate="$hm_gen/LaunchAgents/${label}.plist"
+  else
+    candidate="$(/bin/ls -t /nix/store/*${label}.plist 2>/dev/null | /usr/bin/head -n 1 || true)"
+  fi
 
   if [ -z "$candidate" ]; then
     return 0

@@ -9,42 +9,115 @@ log() {
   printf '>> %s\n' "$*"
 }
 
+upstream_checks_green() {
+  local sha="$1"
+  local checks_json
+  checks_json=$(gh api "/repos/clawdbot/clawdbot/commits/${sha}/check-runs?per_page=100" 2>/dev/null || true)
+  if [[ -z "$checks_json" ]]; then
+    log "No check runs found for $sha"
+    return 1
+  fi
+
+  local relevant_count
+  relevant_count=$(printf '%s' "$checks_json" | jq '[.check_runs[] | select(.name | test("windows"; "i") | not)] | length')
+  if [[ "$relevant_count" -eq 0 ]]; then
+    log "No non-windows check runs found for $sha"
+    return 1
+  fi
+
+  local failing_count
+  failing_count=$(
+    printf '%s' "$checks_json" | jq '[.check_runs[]
+      | select(.name | test("windows"; "i") | not)
+      | select(.status != "completed" or (.conclusion != "success" and .conclusion != "skipped"))
+    ] | length'
+  )
+  if [[ "$failing_count" -ne 0 ]]; then
+    log "Non-windows checks not green for $sha"
+    return 1
+  fi
+
+  return 0
+}
+
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required but not installed." >&2
   exit 1
 fi
 
-log "Resolving clawdbot main SHA"
-latest_sha=$(git ls-remote https://github.com/clawdbot/clawdbot.git refs/heads/main | awk '{print $1}' || true)
-if [[ -z "$latest_sha" ]]; then
-  echo "Failed to resolve clawdbot main SHA" >&2
-  exit 1
+log "Resolving clawdbot main SHAs"
+mapfile -t candidate_shas < <(gh api /repos/clawdbot/clawdbot/commits?per_page=10 | jq -r '.[].sha' || true)
+if [[ ${#candidate_shas[@]} -eq 0 ]]; then
+  latest_sha=$(git ls-remote https://github.com/clawdbot/clawdbot.git refs/heads/main | awk '{print $1}' || true)
+  if [[ -z "$latest_sha" ]]; then
+    echo "Failed to resolve clawdbot main SHA" >&2
+    exit 1
+  fi
+  candidate_shas=("$latest_sha")
 fi
-log "Latest clawdbot main: $latest_sha"
 
-source_url="https://github.com/clawdbot/clawdbot/archive/${latest_sha}.tar.gz"
-log "Prefetching source tarball"
-source_prefetch=$(
-  nix --extra-experimental-features "nix-command flakes" store prefetch-file --unpack --json "$source_url" 2>"/tmp/nix-prefetch-source.err" \
-  || true
-)
-if [[ -z "$source_prefetch" ]]; then
-  cat "/tmp/nix-prefetch-source.err" >&2 || true
+selected_sha=""
+selected_hash=""
+for sha in "${candidate_shas[@]}"; do
+  if ! upstream_checks_green "$sha"; then
+    continue
+  fi
+  log "Testing upstream SHA: $sha"
+  source_url="https://github.com/clawdbot/clawdbot/archive/${sha}.tar.gz"
+  log "Prefetching source tarball"
+  source_prefetch=$(
+    nix --extra-experimental-features "nix-command flakes" store prefetch-file --unpack --json "$source_url" 2>"/tmp/nix-prefetch-source.err" \
+    || true
+  )
+  if [[ -z "$source_prefetch" ]]; then
+    cat "/tmp/nix-prefetch-source.err" >&2 || true
+    rm -f "/tmp/nix-prefetch-source.err"
+    echo "Failed to resolve source hash for $sha" >&2
+    continue
+  fi
   rm -f "/tmp/nix-prefetch-source.err"
-  echo "Failed to resolve source hash" >&2
-  exit 1
-fi
-rm -f "/tmp/nix-prefetch-source.err"
-source_hash=$(printf '%s' "$source_prefetch" | jq -r '.hash // empty')
-if [[ -z "$source_hash" ]]; then
-  printf '%s\n' "$source_prefetch" >&2
-  echo "Failed to parse source hash" >&2
-  exit 1
-fi
-log "Source hash: $source_hash"
+  source_hash=$(printf '%s' "$source_prefetch" | jq -r '.hash // empty')
+  if [[ -z "$source_hash" ]]; then
+    printf '%s\n' "$source_prefetch" >&2
+    echo "Failed to parse source hash for $sha" >&2
+    continue
+  fi
+  log "Source hash: $source_hash"
 
-perl -0pi -e "s|rev = \"[^\"]+\";|rev = \"${latest_sha}\";|" "$source_file"
-perl -0pi -e "s|hash = \"[^\"]+\";|hash = \"${source_hash}\";|" "$source_file"
+  perl -0pi -e "s|rev = \"[^\"]+\";|rev = \"${sha}\";|" "$source_file"
+  perl -0pi -e "s|hash = \"[^\"]+\";|hash = \"${source_hash}\";|" "$source_file"
+  # Force a fresh pnpmDepsHash recalculation for the candidate rev.
+  perl -0pi -e "s|pnpmDepsHash = \"[^\"]*\";|pnpmDepsHash = \"\";|" "$source_file"
+
+  build_log=$(mktemp)
+  log "Building gateway to validate pnpmDepsHash"
+  if ! nix build .#clawdbot-gateway --accept-flake-config >"$build_log" 2>&1; then
+    pnpm_hash=$(grep -Eo 'got: *sha256-[A-Za-z0-9+/=]+' "$build_log" | head -n 1 | sed 's/.*got: *//' || true)
+    if [[ -n "$pnpm_hash" ]]; then
+      log "pnpmDepsHash mismatch detected: $pnpm_hash"
+      perl -0pi -e "s|pnpmDepsHash = \"[^\"]*\";|pnpmDepsHash = \"${pnpm_hash}\";|" "$source_file"
+      if ! nix build .#clawdbot-gateway --accept-flake-config >"$build_log" 2>&1; then
+        tail -n 200 "$build_log" >&2 || true
+        rm -f "$build_log"
+        continue
+      fi
+    else
+      tail -n 200 "$build_log" >&2 || true
+      rm -f "$build_log"
+      continue
+    fi
+  fi
+  rm -f "$build_log"
+  selected_sha="$sha"
+  selected_hash="$source_hash"
+  break
+done
+
+if [[ -z "$selected_sha" ]]; then
+  echo "Failed to find a buildable upstream revision in the last ${#candidate_shas[@]} commits." >&2
+  exit 1
+fi
+log "Selected upstream SHA: $selected_sha"
 
 log "Fetching latest release metadata"
 release_json=$(gh api /repos/clawdbot/clawdbot/releases?per_page=20 || true)
@@ -90,26 +163,13 @@ perl -0pi -e "s|version = \"[^\"]+\";|version = \"${app_version}\";|" "$app_file
 perl -0pi -e "s|url = \"[^\"]+\";|url = \"${app_url}\";|" "$app_file"
 perl -0pi -e "s|hash = \"[^\"]+\";|hash = \"${app_hash}\";|" "$app_file"
 
-build_log=$(mktemp)
-log "Building gateway to validate pnpmDepsHash"
-if ! nix build .#clawdbot-gateway --accept-flake-config >"$build_log" 2>&1; then
-  pnpm_hash=$(grep -Eo 'got: *sha256-[A-Za-z0-9+/=]+' "$build_log" | head -n 1 | sed 's/.*got: *//')
-  if [[ -z "$pnpm_hash" ]]; then
-    cat "$build_log" >&2
-    rm -f "$build_log"
-    exit 1
-  fi
-  perl -0pi -e "s|pnpmDepsHash = \"[^\"]+\";|pnpmDepsHash = \"${pnpm_hash}\";|" "$source_file"
-  if ! nix build .#clawdbot-gateway --accept-flake-config >"$build_log" 2>&1; then
-    cat "$build_log" >&2
-    rm -f "$build_log"
-    exit 1
-  fi
-fi
-rm -f "$build_log"
-
 log "Building app to validate fetchzip hash"
-nix build .#clawdbot-app --accept-flake-config
+current_system=$(nix eval --impure --raw --expr 'builtins.currentSystem' 2>/dev/null || true)
+if [[ "$current_system" == *darwin* ]]; then
+  nix build .#clawdbot-app --accept-flake-config
+else
+  log "Skipping app build on non-darwin system (${current_system:-unknown})"
+fi
 
 if git diff --quiet; then
   echo "No pin changes detected."
@@ -133,5 +193,9 @@ Tests:
 - nix build .#clawdbot-gateway --accept-flake-config
 - nix build .#clawdbot-app --accept-flake-config
 EOF
+
+log "Rebasing on latest main"
+git fetch origin main
+git rebase origin/main
 
 git push origin HEAD:main

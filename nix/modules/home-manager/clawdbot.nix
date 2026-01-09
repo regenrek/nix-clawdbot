@@ -8,10 +8,18 @@ let
 
   mkBaseConfig = workspaceDir: inst: {
     gateway = { mode = "local"; };
-    agent = {
-      workspace = workspaceDir;
-      model = { primary = inst.agent.model; };
-      thinkingDefault = inst.agent.thinkingDefault;
+    agents = {
+      defaults = {
+        workspace = workspaceDir;
+        model = { primary = inst.agent.model; };
+        thinkingDefault = inst.agent.thinkingDefault;
+      };
+      list = [
+        {
+          id = "main";
+          default = true;
+        }
+      ];
     };
   };
 
@@ -25,7 +33,7 @@ let
   };
 
   mkRoutingConfig = inst: {
-    routing = {
+    messages = {
       queue = {
         mode = inst.routing.queue.mode;
         byProvider = inst.routing.queue.byProvider;
@@ -721,7 +729,7 @@ let
     '';
   in {
     homeFile = {
-      name = inst.configPath;
+      name = toRelative inst.configPath;
       value = { text = configJson; };
     };
 

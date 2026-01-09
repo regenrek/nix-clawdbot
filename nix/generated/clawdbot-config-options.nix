@@ -4,337 +4,484 @@ let
   t = lib.types;
 in
 {
-  agent = lib.mkOption {
+  agents = lib.mkOption {
     type = t.submodule { options = {
-    bash = lib.mkOption {
+    defaults = lib.mkOption {
       type = t.submodule { options = {
-      backgroundMs = lib.mkOption {
-        type = t.int;
+      blockStreamingBreak = lib.mkOption {
+        type = t.oneOf [ t.enum [ "text_end" ] t.enum [ "message_end" ] ];
       };
-      cleanupMs = lib.mkOption {
-        type = t.int;
-      };
-      timeoutSec = lib.mkOption {
-        type = t.int;
-      };
-    }; };
-    };
-    blockStreamingBreak = lib.mkOption {
-      type = t.oneOf [ t.enum [ "text_end" ] t.enum [ "message_end" ] ];
-    };
-    blockStreamingChunk = lib.mkOption {
-      type = t.submodule { options = {
-      breakPreference = lib.mkOption {
-        type = t.oneOf [ t.enum [ "paragraph" ] t.enum [ "newline" ] t.enum [ "sentence" ] ];
-      };
-      maxChars = lib.mkOption {
-        type = t.int;
-      };
-      minChars = lib.mkOption {
-        type = t.int;
-      };
-    }; };
-    };
-    blockStreamingDefault = lib.mkOption {
-      type = t.oneOf [ t.enum [ "off" ] t.enum [ "on" ] ];
-    };
-    contextPruning = lib.mkOption {
-      type = t.submodule { options = {
-      hardClear = lib.mkOption {
+      blockStreamingChunk = lib.mkOption {
         type = t.submodule { options = {
-        enabled = lib.mkOption {
-          type = t.bool;
-        };
-        placeholder = lib.mkOption {
-          type = t.str;
-        };
-      }; };
-      };
-      hardClearRatio = lib.mkOption {
-        type = t.number;
-      };
-      keepLastAssistants = lib.mkOption {
-        type = t.int;
-      };
-      minPrunableToolChars = lib.mkOption {
-        type = t.int;
-      };
-      mode = lib.mkOption {
-        type = t.oneOf [ t.enum [ "off" ] t.enum [ "adaptive" ] t.enum [ "aggressive" ] ];
-      };
-      softTrim = lib.mkOption {
-        type = t.submodule { options = {
-        headChars = lib.mkOption {
-          type = t.int;
+        breakPreference = lib.mkOption {
+          type = t.oneOf [ t.enum [ "paragraph" ] t.enum [ "newline" ] t.enum [ "sentence" ] ];
         };
         maxChars = lib.mkOption {
           type = t.int;
         };
-        tailChars = lib.mkOption {
+        minChars = lib.mkOption {
           type = t.int;
         };
       }; };
       };
-      softTrimRatio = lib.mkOption {
-        type = t.number;
+      blockStreamingDefault = lib.mkOption {
+        type = t.oneOf [ t.enum [ "off" ] t.enum [ "on" ] ];
       };
-      tools = lib.mkOption {
+      contextPruning = lib.mkOption {
         type = t.submodule { options = {
-        allow = lib.mkOption {
-          type = t.listOf (t.str);
+        hardClear = lib.mkOption {
+          type = t.submodule { options = {
+          enabled = lib.mkOption {
+            type = t.bool;
+          };
+          placeholder = lib.mkOption {
+            type = t.str;
+          };
+        }; };
         };
-        deny = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-      }; };
-      };
-    }; };
-    };
-    contextTokens = lib.mkOption {
-      type = t.int;
-    };
-    elevated = lib.mkOption {
-      type = t.submodule { options = {
-      allowFrom = lib.mkOption {
-        type = t.submodule { options = {
-        discord = lib.mkOption {
-          type = t.listOf (t.oneOf [ t.str t.number ]);
-        };
-        imessage = lib.mkOption {
-          type = t.listOf (t.oneOf [ t.str t.number ]);
-        };
-        signal = lib.mkOption {
-          type = t.listOf (t.oneOf [ t.str t.number ]);
-        };
-        slack = lib.mkOption {
-          type = t.listOf (t.oneOf [ t.str t.number ]);
-        };
-        telegram = lib.mkOption {
-          type = t.listOf (t.oneOf [ t.str t.number ]);
-        };
-        webchat = lib.mkOption {
-          type = t.listOf (t.oneOf [ t.str t.number ]);
-        };
-        whatsapp = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-      }; };
-      };
-      enabled = lib.mkOption {
-        type = t.bool;
-      };
-    }; };
-    };
-    elevatedDefault = lib.mkOption {
-      type = t.oneOf [ t.enum [ "off" ] t.enum [ "on" ] ];
-    };
-    heartbeat = lib.mkOption {
-      type = t.submodule { options = {
-      ackMaxChars = lib.mkOption {
-        type = t.int;
-      };
-      every = lib.mkOption {
-        type = t.str;
-      };
-      model = lib.mkOption {
-        type = t.str;
-      };
-      prompt = lib.mkOption {
-        type = t.str;
-      };
-      target = lib.mkOption {
-        type = t.oneOf [ t.enum [ "last" ] t.enum [ "whatsapp" ] t.enum [ "telegram" ] t.enum [ "discord" ] t.enum [ "slack" ] t.enum [ "signal" ] t.enum [ "imessage" ] t.enum [ "none" ] ];
-      };
-      to = lib.mkOption {
-        type = t.str;
-      };
-    }; };
-    };
-    imageModel = lib.mkOption {
-      type = t.submodule { options = {
-      fallbacks = lib.mkOption {
-        type = t.listOf (t.str);
-      };
-      primary = lib.mkOption {
-        type = t.str;
-      };
-    }; };
-    };
-    maxConcurrent = lib.mkOption {
-      type = t.int;
-    };
-    mediaMaxMb = lib.mkOption {
-      type = t.number;
-    };
-    model = lib.mkOption {
-      type = t.submodule { options = {
-      fallbacks = lib.mkOption {
-        type = t.listOf (t.str);
-      };
-      primary = lib.mkOption {
-        type = t.str;
-      };
-    }; };
-    };
-    models = lib.mkOption {
-      type = t.attrsOf (t.submodule { options = {
-      alias = lib.mkOption {
-        type = t.str;
-      };
-      params = lib.mkOption {
-        type = t.attrsOf (t.anything);
-      };
-    }; });
-    };
-    sandbox = lib.mkOption {
-      type = t.submodule { options = {
-      browser = lib.mkOption {
-        type = t.submodule { options = {
-        cdpPort = lib.mkOption {
-          type = t.int;
-        };
-        containerPrefix = lib.mkOption {
-          type = t.str;
-        };
-        enableNoVnc = lib.mkOption {
-          type = t.bool;
-        };
-        enabled = lib.mkOption {
-          type = t.bool;
-        };
-        headless = lib.mkOption {
-          type = t.bool;
-        };
-        image = lib.mkOption {
-          type = t.str;
-        };
-        noVncPort = lib.mkOption {
-          type = t.int;
-        };
-        vncPort = lib.mkOption {
-          type = t.int;
-        };
-      }; };
-      };
-      docker = lib.mkOption {
-        type = t.submodule { options = {
-        apparmorProfile = lib.mkOption {
-          type = t.str;
-        };
-        capDrop = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-        containerPrefix = lib.mkOption {
-          type = t.str;
-        };
-        cpus = lib.mkOption {
+        hardClearRatio = lib.mkOption {
           type = t.number;
         };
-        dns = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-        env = lib.mkOption {
-          type = t.attrsOf (t.str);
-        };
-        extraHosts = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-        image = lib.mkOption {
-          type = t.str;
-        };
-        memory = lib.mkOption {
-          type = t.oneOf [ t.str t.number ];
-        };
-        memorySwap = lib.mkOption {
-          type = t.oneOf [ t.str t.number ];
-        };
-        network = lib.mkOption {
-          type = t.str;
-        };
-        pidsLimit = lib.mkOption {
+        keepLastAssistants = lib.mkOption {
           type = t.int;
         };
-        readOnlyRoot = lib.mkOption {
-          type = t.bool;
+        minPrunableToolChars = lib.mkOption {
+          type = t.int;
         };
-        seccompProfile = lib.mkOption {
-          type = t.str;
+        mode = lib.mkOption {
+          type = t.oneOf [ t.enum [ "off" ] t.enum [ "adaptive" ] t.enum [ "aggressive" ] ];
         };
-        setupCommand = lib.mkOption {
-          type = t.str;
-        };
-        tmpfs = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-        ulimits = lib.mkOption {
-          type = t.attrsOf (t.oneOf [ t.str t.number t.submodule { options = {
-          hard = lib.mkOption {
+        softTrim = lib.mkOption {
+          type = t.submodule { options = {
+          headChars = lib.mkOption {
             type = t.int;
           };
-          soft = lib.mkOption {
+          maxChars = lib.mkOption {
             type = t.int;
           };
-        }; } ]);
+          tailChars = lib.mkOption {
+            type = t.int;
+          };
+        }; };
         };
-        user = lib.mkOption {
-          type = t.str;
+        softTrimRatio = lib.mkOption {
+          type = t.number;
         };
-        workdir = lib.mkOption {
-          type = t.str;
-        };
-      }; };
-      };
-      mode = lib.mkOption {
-        type = t.oneOf [ t.enum [ "off" ] t.enum [ "non-main" ] t.enum [ "all" ] ];
-      };
-      perSession = lib.mkOption {
-        type = t.bool;
-      };
-      prune = lib.mkOption {
-        type = t.submodule { options = {
-        idleHours = lib.mkOption {
-          type = t.int;
-        };
-        maxAgeDays = lib.mkOption {
-          type = t.int;
+        tools = lib.mkOption {
+          type = t.submodule { options = {
+          allow = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          deny = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+        }; };
         };
       }; };
       };
-      scope = lib.mkOption {
-        type = t.oneOf [ t.enum [ "session" ] t.enum [ "agent" ] t.enum [ "shared" ] ];
-      };
-      sessionToolsVisibility = lib.mkOption {
-        type = t.oneOf [ t.enum [ "spawned" ] t.enum [ "all" ] ];
-      };
-      tools = lib.mkOption {
-        type = t.submodule { options = {
-        allow = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-        deny = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-      }; };
-      };
-      workspaceAccess = lib.mkOption {
-        type = t.oneOf [ t.enum [ "none" ] t.enum [ "ro" ] t.enum [ "rw" ] ];
-      };
-      workspaceRoot = lib.mkOption {
-        type = t.str;
-      };
-    }; };
-    };
-    skipBootstrap = lib.mkOption {
-      type = t.bool;
-    };
-    subagents = lib.mkOption {
-      type = t.submodule { options = {
-      archiveAfterMinutes = lib.mkOption {
+      contextTokens = lib.mkOption {
         type = t.int;
+      };
+      elevatedDefault = lib.mkOption {
+        type = t.oneOf [ t.enum [ "off" ] t.enum [ "on" ] ];
+      };
+      heartbeat = lib.mkOption {
+        type = t.submodule { options = {
+        ackMaxChars = lib.mkOption {
+          type = t.int;
+        };
+        every = lib.mkOption {
+          type = t.str;
+        };
+        model = lib.mkOption {
+          type = t.str;
+        };
+        prompt = lib.mkOption {
+          type = t.str;
+        };
+        target = lib.mkOption {
+          type = t.oneOf [ t.enum [ "last" ] t.enum [ "whatsapp" ] t.enum [ "telegram" ] t.enum [ "discord" ] t.enum [ "slack" ] t.enum [ "msteams" ] t.enum [ "signal" ] t.enum [ "imessage" ] t.enum [ "none" ] ];
+        };
+        to = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      imageModel = lib.mkOption {
+        type = t.submodule { options = {
+        fallbacks = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+        primary = lib.mkOption {
+          type = t.str;
+        };
+      }; };
       };
       maxConcurrent = lib.mkOption {
         type = t.int;
       };
+      mediaMaxMb = lib.mkOption {
+        type = t.number;
+      };
+      model = lib.mkOption {
+        type = t.submodule { options = {
+        fallbacks = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+        primary = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      models = lib.mkOption {
+        type = t.attrsOf (t.submodule { options = {
+        alias = lib.mkOption {
+          type = t.str;
+        };
+        params = lib.mkOption {
+          type = t.attrsOf (t.anything);
+        };
+      }; });
+      };
+      sandbox = lib.mkOption {
+        type = t.submodule { options = {
+        browser = lib.mkOption {
+          type = t.submodule { options = {
+          cdpPort = lib.mkOption {
+            type = t.int;
+          };
+          containerPrefix = lib.mkOption {
+            type = t.str;
+          };
+          enableNoVnc = lib.mkOption {
+            type = t.bool;
+          };
+          enabled = lib.mkOption {
+            type = t.bool;
+          };
+          headless = lib.mkOption {
+            type = t.bool;
+          };
+          image = lib.mkOption {
+            type = t.str;
+          };
+          noVncPort = lib.mkOption {
+            type = t.int;
+          };
+          vncPort = lib.mkOption {
+            type = t.int;
+          };
+        }; };
+        };
+        docker = lib.mkOption {
+          type = t.submodule { options = {
+          apparmorProfile = lib.mkOption {
+            type = t.str;
+          };
+          capDrop = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          containerPrefix = lib.mkOption {
+            type = t.str;
+          };
+          cpus = lib.mkOption {
+            type = t.number;
+          };
+          dns = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          env = lib.mkOption {
+            type = t.attrsOf (t.str);
+          };
+          extraHosts = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          image = lib.mkOption {
+            type = t.str;
+          };
+          memory = lib.mkOption {
+            type = t.oneOf [ t.str t.number ];
+          };
+          memorySwap = lib.mkOption {
+            type = t.oneOf [ t.str t.number ];
+          };
+          network = lib.mkOption {
+            type = t.str;
+          };
+          pidsLimit = lib.mkOption {
+            type = t.int;
+          };
+          readOnlyRoot = lib.mkOption {
+            type = t.bool;
+          };
+          seccompProfile = lib.mkOption {
+            type = t.str;
+          };
+          setupCommand = lib.mkOption {
+            type = t.str;
+          };
+          tmpfs = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          ulimits = lib.mkOption {
+            type = t.attrsOf (t.oneOf [ t.str t.number t.submodule { options = {
+            hard = lib.mkOption {
+              type = t.int;
+            };
+            soft = lib.mkOption {
+              type = t.int;
+            };
+          }; } ]);
+          };
+          user = lib.mkOption {
+            type = t.str;
+          };
+          workdir = lib.mkOption {
+            type = t.str;
+          };
+        }; };
+        };
+        mode = lib.mkOption {
+          type = t.oneOf [ t.enum [ "off" ] t.enum [ "non-main" ] t.enum [ "all" ] ];
+        };
+        perSession = lib.mkOption {
+          type = t.bool;
+        };
+        prune = lib.mkOption {
+          type = t.submodule { options = {
+          idleHours = lib.mkOption {
+            type = t.int;
+          };
+          maxAgeDays = lib.mkOption {
+            type = t.int;
+          };
+        }; };
+        };
+        scope = lib.mkOption {
+          type = t.oneOf [ t.enum [ "session" ] t.enum [ "agent" ] t.enum [ "shared" ] ];
+        };
+        sessionToolsVisibility = lib.mkOption {
+          type = t.oneOf [ t.enum [ "spawned" ] t.enum [ "all" ] ];
+        };
+        workspaceAccess = lib.mkOption {
+          type = t.oneOf [ t.enum [ "none" ] t.enum [ "ro" ] t.enum [ "rw" ] ];
+        };
+        workspaceRoot = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      skipBootstrap = lib.mkOption {
+        type = t.bool;
+      };
+      subagents = lib.mkOption {
+        type = t.submodule { options = {
+        archiveAfterMinutes = lib.mkOption {
+          type = t.int;
+        };
+        maxConcurrent = lib.mkOption {
+          type = t.int;
+        };
+      }; };
+      };
+      thinkingDefault = lib.mkOption {
+        type = t.oneOf [ t.enum [ "off" ] t.enum [ "minimal" ] t.enum [ "low" ] t.enum [ "medium" ] t.enum [ "high" ] ];
+      };
+      timeoutSeconds = lib.mkOption {
+        type = t.int;
+      };
+      typingIntervalSeconds = lib.mkOption {
+        type = t.int;
+      };
+      typingMode = lib.mkOption {
+        type = t.oneOf [ t.enum [ "never" ] t.enum [ "instant" ] t.enum [ "thinking" ] t.enum [ "message" ] ];
+      };
+      userTimezone = lib.mkOption {
+        type = t.str;
+      };
+      verboseDefault = lib.mkOption {
+        type = t.oneOf [ t.enum [ "off" ] t.enum [ "on" ] ];
+      };
+      workspace = lib.mkOption {
+        type = t.str;
+      };
+    }; };
+    };
+    list = lib.mkOption {
+      type = t.listOf (t.submodule { options = {
+      agentDir = lib.mkOption {
+        type = t.str;
+      };
+      default = lib.mkOption {
+        type = t.bool;
+      };
+      groupChat = lib.mkOption {
+        type = t.submodule { options = {
+        historyLimit = lib.mkOption {
+          type = t.int;
+        };
+        mentionPatterns = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+      }; };
+      };
+      id = lib.mkOption {
+        type = t.str;
+      };
+      identity = lib.mkOption {
+        type = t.submodule { options = {
+        emoji = lib.mkOption {
+          type = t.str;
+        };
+        name = lib.mkOption {
+          type = t.str;
+        };
+        theme = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      model = lib.mkOption {
+        type = t.str;
+      };
+      name = lib.mkOption {
+        type = t.str;
+      };
+      sandbox = lib.mkOption {
+        type = t.submodule { options = {
+        browser = lib.mkOption {
+          type = t.submodule { options = {
+          cdpPort = lib.mkOption {
+            type = t.int;
+          };
+          containerPrefix = lib.mkOption {
+            type = t.str;
+          };
+          enableNoVnc = lib.mkOption {
+            type = t.bool;
+          };
+          enabled = lib.mkOption {
+            type = t.bool;
+          };
+          headless = lib.mkOption {
+            type = t.bool;
+          };
+          image = lib.mkOption {
+            type = t.str;
+          };
+          noVncPort = lib.mkOption {
+            type = t.int;
+          };
+          vncPort = lib.mkOption {
+            type = t.int;
+          };
+        }; };
+        };
+        docker = lib.mkOption {
+          type = t.submodule { options = {
+          apparmorProfile = lib.mkOption {
+            type = t.str;
+          };
+          capDrop = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          containerPrefix = lib.mkOption {
+            type = t.str;
+          };
+          cpus = lib.mkOption {
+            type = t.number;
+          };
+          dns = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          env = lib.mkOption {
+            type = t.attrsOf (t.str);
+          };
+          extraHosts = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          image = lib.mkOption {
+            type = t.str;
+          };
+          memory = lib.mkOption {
+            type = t.oneOf [ t.str t.number ];
+          };
+          memorySwap = lib.mkOption {
+            type = t.oneOf [ t.str t.number ];
+          };
+          network = lib.mkOption {
+            type = t.str;
+          };
+          pidsLimit = lib.mkOption {
+            type = t.int;
+          };
+          readOnlyRoot = lib.mkOption {
+            type = t.bool;
+          };
+          seccompProfile = lib.mkOption {
+            type = t.str;
+          };
+          setupCommand = lib.mkOption {
+            type = t.str;
+          };
+          tmpfs = lib.mkOption {
+            type = t.listOf (t.str);
+          };
+          ulimits = lib.mkOption {
+            type = t.attrsOf (t.oneOf [ t.str t.number t.submodule { options = {
+            hard = lib.mkOption {
+              type = t.int;
+            };
+            soft = lib.mkOption {
+              type = t.int;
+            };
+          }; } ]);
+          };
+          user = lib.mkOption {
+            type = t.str;
+          };
+          workdir = lib.mkOption {
+            type = t.str;
+          };
+        }; };
+        };
+        mode = lib.mkOption {
+          type = t.oneOf [ t.enum [ "off" ] t.enum [ "non-main" ] t.enum [ "all" ] ];
+        };
+        perSession = lib.mkOption {
+          type = t.bool;
+        };
+        prune = lib.mkOption {
+          type = t.submodule { options = {
+          idleHours = lib.mkOption {
+            type = t.int;
+          };
+          maxAgeDays = lib.mkOption {
+            type = t.int;
+          };
+        }; };
+        };
+        scope = lib.mkOption {
+          type = t.oneOf [ t.enum [ "session" ] t.enum [ "agent" ] t.enum [ "shared" ] ];
+        };
+        sessionToolsVisibility = lib.mkOption {
+          type = t.oneOf [ t.enum [ "spawned" ] t.enum [ "all" ] ];
+        };
+        workspaceAccess = lib.mkOption {
+          type = t.oneOf [ t.enum [ "none" ] t.enum [ "ro" ] t.enum [ "rw" ] ];
+        };
+        workspaceRoot = lib.mkOption {
+          type = t.str;
+        };
+      }; };
+      };
+      subagents = lib.mkOption {
+        type = t.submodule { options = {
+        allowAgents = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+      }; };
+      };
       tools = lib.mkOption {
         type = t.submodule { options = {
         allow = lib.mkOption {
@@ -343,40 +490,41 @@ in
         deny = lib.mkOption {
           type = t.listOf (t.str);
         };
+        sandbox = lib.mkOption {
+          type = t.submodule { options = {
+          tools = lib.mkOption {
+            type = t.submodule { options = {
+            allow = lib.mkOption {
+              type = t.listOf (t.str);
+            };
+            deny = lib.mkOption {
+              type = t.listOf (t.str);
+            };
+          }; };
+          };
+        }; };
+        };
       }; };
       };
-    }; };
+      workspace = lib.mkOption {
+        type = t.str;
+      };
+    }; });
     };
-    thinkingDefault = lib.mkOption {
-      type = t.oneOf [ t.enum [ "off" ] t.enum [ "minimal" ] t.enum [ "low" ] t.enum [ "medium" ] t.enum [ "high" ] ];
-    };
-    timeoutSeconds = lib.mkOption {
-      type = t.int;
-    };
-    tools = lib.mkOption {
+  }; };
+  };
+
+  audio = lib.mkOption {
+    type = t.submodule { options = {
+    transcription = lib.mkOption {
       type = t.submodule { options = {
-      allow = lib.mkOption {
+      command = lib.mkOption {
         type = t.listOf (t.str);
       };
-      deny = lib.mkOption {
-        type = t.listOf (t.str);
+      timeoutSeconds = lib.mkOption {
+        type = t.int;
       };
     }; };
-    };
-    typingIntervalSeconds = lib.mkOption {
-      type = t.int;
-    };
-    typingMode = lib.mkOption {
-      type = t.oneOf [ t.enum [ "never" ] t.enum [ "instant" ] t.enum [ "thinking" ] t.enum [ "message" ] ];
-    };
-    userTimezone = lib.mkOption {
-      type = t.str;
-    };
-    verboseDefault = lib.mkOption {
-      type = t.oneOf [ t.enum [ "off" ] t.enum [ "on" ] ];
-    };
-    workspace = lib.mkOption {
-      type = t.str;
     };
   }; };
   };
@@ -392,7 +540,7 @@ in
         type = t.str;
       };
       mode = lib.mkOption {
-        type = t.oneOf [ t.enum [ "api_key" ] t.enum [ "oauth" ] ];
+        type = t.oneOf [ t.enum [ "api_key" ] t.enum [ "oauth" ] t.enum [ "token" ] ];
       };
       provider = lib.mkOption {
         type = t.str;
@@ -400,6 +548,40 @@ in
     }; });
     };
   }; };
+  };
+
+  bindings = lib.mkOption {
+    type = t.listOf (t.submodule { options = {
+    agentId = lib.mkOption {
+      type = t.str;
+    };
+    match = lib.mkOption {
+      type = t.submodule { options = {
+      accountId = lib.mkOption {
+        type = t.str;
+      };
+      guildId = lib.mkOption {
+        type = t.str;
+      };
+      peer = lib.mkOption {
+        type = t.submodule { options = {
+        id = lib.mkOption {
+          type = t.str;
+        };
+        kind = lib.mkOption {
+          type = t.oneOf [ t.enum [ "dm" ] t.enum [ "group" ] t.enum [ "channel" ] ];
+        };
+      }; };
+      };
+      provider = lib.mkOption {
+        type = t.str;
+      };
+      teamId = lib.mkOption {
+        type = t.str;
+      };
+    }; };
+    };
+  }; });
   };
 
   bridge = lib.mkOption {
@@ -481,6 +663,9 @@ in
   commands = lib.mkOption {
     type = t.submodule { options = {
     native = lib.mkOption {
+      type = t.bool;
+    };
+    restart = lib.mkOption {
       type = t.bool;
     };
     text = lib.mkOption {
@@ -837,6 +1022,9 @@ in
       };
     }; };
     };
+    vars = lib.mkOption {
+      type = t.attrsOf (t.str);
+    };
   }; };
   };
 
@@ -890,6 +1078,12 @@ in
     remote = lib.mkOption {
       type = t.submodule { options = {
       password = lib.mkOption {
+        type = t.str;
+      };
+      sshIdentity = lib.mkOption {
+        type = t.str;
+      };
+      sshTarget = lib.mkOption {
         type = t.str;
       };
       token = lib.mkOption {
@@ -1003,7 +1197,7 @@ in
         type = t.str;
       };
       provider = lib.mkOption {
-        type = t.oneOf [ t.enum [ "last" ] t.enum [ "whatsapp" ] t.enum [ "telegram" ] t.enum [ "discord" ] t.enum [ "slack" ] t.enum [ "signal" ] t.enum [ "imessage" ] ];
+        type = t.oneOf [ t.enum [ "last" ] t.enum [ "whatsapp" ] t.enum [ "telegram" ] t.enum [ "discord" ] t.enum [ "slack" ] t.enum [ "signal" ] t.enum [ "imessage" ] t.enum [ "msteams" ] ];
       };
       sessionKey = lib.mkOption {
         type = t.str;
@@ -1048,20 +1242,6 @@ in
       type = t.str;
     };
     transformsDir = lib.mkOption {
-      type = t.str;
-    };
-  }; };
-  };
-
-  identity = lib.mkOption {
-    type = t.submodule { options = {
-    emoji = lib.mkOption {
-      type = t.str;
-    };
-    name = lib.mkOption {
-      type = t.str;
-    };
-    theme = lib.mkOption {
       type = t.str;
     };
   }; };
@@ -1199,8 +1379,62 @@ in
     ackReactionScope = lib.mkOption {
       type = t.enum [ "group-mentions" "group-all" "direct" "all" ];
     };
+    groupChat = lib.mkOption {
+      type = t.submodule { options = {
+      historyLimit = lib.mkOption {
+        type = t.int;
+      };
+      mentionPatterns = lib.mkOption {
+        type = t.listOf (t.str);
+      };
+    }; };
+    };
     messagePrefix = lib.mkOption {
       type = t.str;
+    };
+    queue = lib.mkOption {
+      type = t.submodule { options = {
+      byProvider = lib.mkOption {
+        type = t.submodule { options = {
+        discord = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        imessage = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        msteams = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        signal = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        slack = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        telegram = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        webchat = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+        whatsapp = lib.mkOption {
+          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+        };
+      }; };
+      };
+      cap = lib.mkOption {
+        type = t.int;
+      };
+      debounceMs = lib.mkOption {
+        type = t.int;
+      };
+      drop = lib.mkOption {
+        type = t.oneOf [ t.enum [ "old" ] t.enum [ "new" ] t.enum [ "summarize" ] ];
+      };
+      mode = lib.mkOption {
+        type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
+      };
+    }; };
     };
     responsePrefix = lib.mkOption {
       type = t.str;
@@ -1295,279 +1529,64 @@ in
   }; };
   };
 
-  routing = lib.mkOption {
+  msteams = lib.mkOption {
     type = t.submodule { options = {
-    agentToAgent = lib.mkOption {
-      type = t.submodule { options = {
-      allow = lib.mkOption {
-        type = t.listOf (t.str);
-      };
-      enabled = lib.mkOption {
-        type = t.bool;
-      };
-    }; };
+    allowFrom = lib.mkOption {
+      type = t.listOf (t.str);
     };
-    agents = lib.mkOption {
-      type = t.attrsOf (t.submodule { options = {
-      agentDir = lib.mkOption {
-        type = t.str;
-      };
-      model = lib.mkOption {
-        type = t.str;
-      };
-      name = lib.mkOption {
-        type = t.str;
-      };
-      sandbox = lib.mkOption {
-        type = t.submodule { options = {
-        browser = lib.mkOption {
-          type = t.submodule { options = {
-          cdpPort = lib.mkOption {
-            type = t.int;
-          };
-          containerPrefix = lib.mkOption {
-            type = t.str;
-          };
-          enableNoVnc = lib.mkOption {
-            type = t.bool;
-          };
-          enabled = lib.mkOption {
-            type = t.bool;
-          };
-          headless = lib.mkOption {
-            type = t.bool;
-          };
-          image = lib.mkOption {
-            type = t.str;
-          };
-          noVncPort = lib.mkOption {
-            type = t.int;
-          };
-          vncPort = lib.mkOption {
-            type = t.int;
-          };
-        }; };
-        };
-        docker = lib.mkOption {
-          type = t.submodule { options = {
-          apparmorProfile = lib.mkOption {
-            type = t.str;
-          };
-          capDrop = lib.mkOption {
-            type = t.listOf (t.str);
-          };
-          containerPrefix = lib.mkOption {
-            type = t.str;
-          };
-          cpus = lib.mkOption {
-            type = t.number;
-          };
-          dns = lib.mkOption {
-            type = t.listOf (t.str);
-          };
-          env = lib.mkOption {
-            type = t.attrsOf (t.str);
-          };
-          extraHosts = lib.mkOption {
-            type = t.listOf (t.str);
-          };
-          image = lib.mkOption {
-            type = t.str;
-          };
-          memory = lib.mkOption {
-            type = t.oneOf [ t.str t.number ];
-          };
-          memorySwap = lib.mkOption {
-            type = t.oneOf [ t.str t.number ];
-          };
-          network = lib.mkOption {
-            type = t.str;
-          };
-          pidsLimit = lib.mkOption {
-            type = t.int;
-          };
-          readOnlyRoot = lib.mkOption {
-            type = t.bool;
-          };
-          seccompProfile = lib.mkOption {
-            type = t.str;
-          };
-          setupCommand = lib.mkOption {
-            type = t.str;
-          };
-          tmpfs = lib.mkOption {
-            type = t.listOf (t.str);
-          };
-          ulimits = lib.mkOption {
-            type = t.attrsOf (t.oneOf [ t.str t.number t.submodule { options = {
-            hard = lib.mkOption {
-              type = t.int;
-            };
-            soft = lib.mkOption {
-              type = t.int;
-            };
-          }; } ]);
-          };
-          user = lib.mkOption {
-            type = t.str;
-          };
-          workdir = lib.mkOption {
-            type = t.str;
-          };
-        }; };
-        };
-        mode = lib.mkOption {
-          type = t.oneOf [ t.enum [ "off" ] t.enum [ "non-main" ] t.enum [ "all" ] ];
-        };
-        perSession = lib.mkOption {
-          type = t.bool;
-        };
-        prune = lib.mkOption {
-          type = t.submodule { options = {
-          idleHours = lib.mkOption {
-            type = t.int;
-          };
-          maxAgeDays = lib.mkOption {
-            type = t.int;
-          };
-        }; };
-        };
-        scope = lib.mkOption {
-          type = t.oneOf [ t.enum [ "session" ] t.enum [ "agent" ] t.enum [ "shared" ] ];
-        };
-        tools = lib.mkOption {
-          type = t.submodule { options = {
-          allow = lib.mkOption {
-            type = t.listOf (t.str);
-          };
-          deny = lib.mkOption {
-            type = t.listOf (t.str);
-          };
-        }; };
-        };
-        workspaceAccess = lib.mkOption {
-          type = t.oneOf [ t.enum [ "none" ] t.enum [ "ro" ] t.enum [ "rw" ] ];
-        };
-        workspaceRoot = lib.mkOption {
-          type = t.str;
-        };
-      }; };
-      };
-      subagents = lib.mkOption {
-        type = t.submodule { options = {
-        allowAgents = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-      }; };
-      };
-      tools = lib.mkOption {
-        type = t.submodule { options = {
-        allow = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-        deny = lib.mkOption {
-          type = t.listOf (t.str);
-        };
-      }; };
-      };
-      workspace = lib.mkOption {
-        type = t.str;
-      };
-    }; });
-    };
-    bindings = lib.mkOption {
-      type = t.listOf (t.submodule { options = {
-      agentId = lib.mkOption {
-        type = t.str;
-      };
-      match = lib.mkOption {
-        type = t.submodule { options = {
-        accountId = lib.mkOption {
-          type = t.str;
-        };
-        guildId = lib.mkOption {
-          type = t.str;
-        };
-        peer = lib.mkOption {
-          type = t.submodule { options = {
-          id = lib.mkOption {
-            type = t.str;
-          };
-          kind = lib.mkOption {
-            type = t.oneOf [ t.enum [ "dm" ] t.enum [ "group" ] t.enum [ "channel" ] ];
-          };
-        }; };
-        };
-        provider = lib.mkOption {
-          type = t.str;
-        };
-        teamId = lib.mkOption {
-          type = t.str;
-        };
-      }; };
-      };
-    }; });
-    };
-    defaultAgentId = lib.mkOption {
+    appId = lib.mkOption {
       type = t.str;
     };
-    groupChat = lib.mkOption {
-      type = t.submodule { options = {
-      historyLimit = lib.mkOption {
-        type = t.int;
-      };
-      mentionPatterns = lib.mkOption {
-        type = t.listOf (t.str);
-      };
-    }; };
+    appPassword = lib.mkOption {
+      type = t.str;
     };
-    queue = lib.mkOption {
-      type = t.submodule { options = {
-      byProvider = lib.mkOption {
-        type = t.submodule { options = {
-        discord = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-        imessage = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-        signal = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-        slack = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-        telegram = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-        webchat = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-        whatsapp = lib.mkOption {
-          type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-        };
-      }; };
-      };
-      cap = lib.mkOption {
-        type = t.int;
-      };
-      debounceMs = lib.mkOption {
-        type = t.int;
-      };
-      drop = lib.mkOption {
-        type = t.oneOf [ t.enum [ "old" ] t.enum [ "new" ] t.enum [ "summarize" ] ];
-      };
-      mode = lib.mkOption {
-        type = t.oneOf [ t.enum [ "steer" ] t.enum [ "followup" ] t.enum [ "collect" ] t.enum [ "steer-backlog" ] t.enum [ "steer+backlog" ] t.enum [ "queue" ] t.enum [ "interrupt" ] ];
-      };
-    }; };
+    dmPolicy = lib.mkOption {
+      type = t.enum [ "pairing" "allowlist" "open" "disabled" ];
     };
-    transcribeAudio = lib.mkOption {
-      type = t.submodule { options = {
-      command = lib.mkOption {
-        type = t.listOf (t.str);
+    enabled = lib.mkOption {
+      type = t.bool;
+    };
+    mediaAllowHosts = lib.mkOption {
+      type = t.listOf (t.str);
+    };
+    replyStyle = lib.mkOption {
+      type = t.enum [ "thread" "top-level" ];
+    };
+    requireMention = lib.mkOption {
+      type = t.bool;
+    };
+    teams = lib.mkOption {
+      type = t.attrsOf (t.submodule { options = {
+      channels = lib.mkOption {
+        type = t.attrsOf (t.submodule { options = {
+        replyStyle = lib.mkOption {
+          type = t.enum [ "thread" "top-level" ];
+        };
+        requireMention = lib.mkOption {
+          type = t.bool;
+        };
+      }; });
       };
-      timeoutSeconds = lib.mkOption {
+      replyStyle = lib.mkOption {
+        type = t.enum [ "thread" "top-level" ];
+      };
+      requireMention = lib.mkOption {
+        type = t.bool;
+      };
+    }; });
+    };
+    tenantId = lib.mkOption {
+      type = t.str;
+    };
+    textChunkLimit = lib.mkOption {
+      type = t.int;
+    };
+    webhook = lib.mkOption {
+      type = t.submodule { options = {
+      path = lib.mkOption {
+        type = t.str;
+      };
+      port = lib.mkOption {
         type = t.int;
       };
     }; };
@@ -2290,6 +2309,100 @@ in
     };
     webhookUrl = lib.mkOption {
       type = t.str;
+    };
+  }; };
+  };
+
+  tools = lib.mkOption {
+    type = t.submodule { options = {
+    agentToAgent = lib.mkOption {
+      type = t.submodule { options = {
+      allow = lib.mkOption {
+        type = t.listOf (t.str);
+      };
+      enabled = lib.mkOption {
+        type = t.bool;
+      };
+    }; };
+    };
+    allow = lib.mkOption {
+      type = t.listOf (t.str);
+    };
+    bash = lib.mkOption {
+      type = t.submodule { options = {
+      backgroundMs = lib.mkOption {
+        type = t.int;
+      };
+      cleanupMs = lib.mkOption {
+        type = t.int;
+      };
+      timeoutSec = lib.mkOption {
+        type = t.int;
+      };
+    }; };
+    };
+    deny = lib.mkOption {
+      type = t.listOf (t.str);
+    };
+    elevated = lib.mkOption {
+      type = t.submodule { options = {
+      allowFrom = lib.mkOption {
+        type = t.submodule { options = {
+        discord = lib.mkOption {
+          type = t.listOf (t.oneOf [ t.str t.number ]);
+        };
+        imessage = lib.mkOption {
+          type = t.listOf (t.oneOf [ t.str t.number ]);
+        };
+        signal = lib.mkOption {
+          type = t.listOf (t.oneOf [ t.str t.number ]);
+        };
+        slack = lib.mkOption {
+          type = t.listOf (t.oneOf [ t.str t.number ]);
+        };
+        telegram = lib.mkOption {
+          type = t.listOf (t.oneOf [ t.str t.number ]);
+        };
+        webchat = lib.mkOption {
+          type = t.listOf (t.oneOf [ t.str t.number ]);
+        };
+        whatsapp = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+      }; };
+      };
+      enabled = lib.mkOption {
+        type = t.bool;
+      };
+    }; };
+    };
+    sandbox = lib.mkOption {
+      type = t.submodule { options = {
+      tools = lib.mkOption {
+        type = t.submodule { options = {
+        allow = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+        deny = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+      }; };
+      };
+    }; };
+    };
+    subagents = lib.mkOption {
+      type = t.submodule { options = {
+      tools = lib.mkOption {
+        type = t.submodule { options = {
+        allow = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+        deny = lib.mkOption {
+          type = t.listOf (t.str);
+        };
+      }; };
+      };
+    }; };
     };
   }; };
   };
